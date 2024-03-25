@@ -1,0 +1,69 @@
+const express = require('express');
+const axios = require('axios');
+const swaggerJsdoc = require('swagger-jsdoc');
+const swaggerUi = require('swagger-ui-express');
+
+const app = express();
+const PORT = 8000;
+
+app.use(express.json());
+
+const options = {
+  definition: {
+    openapi: '3.0.0',
+    info: {
+      title: 'Hi Hello 2 API',
+      version: '1.0.0',
+      description: 'A simple Express API for saying hi and hello - Version 2',
+    },
+  },
+  apis: ['./hihello2.js'], // Path to the API docs
+};
+
+const specs = swaggerJsdoc(options);
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
+
+/**
+ * @openapi
+ * /hello:
+ *   post:
+ *     description: Send a message to get a response
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               message:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Successful response
+ *       400:
+ *         description: Bad request
+ */
+app.post('/hello', async (req, res) => {
+  try {
+    let { message } = req.body;
+    if (message === 'hi') {
+      const response = await makingHello(message);
+      res.send(response);
+    } else {
+      res.send('please say hi to me');
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(400).send('오류발생');
+  }
+});
+
+async function makingHello(sentence) {
+  let munjang = sentence + "hello";
+  return munjang;
+}
+
+app.listen(PORT, () => {
+  console.log(`${PORT} 에서 실행중`)
+  console.log(`엔드 포인트는 http://localhost:${PORT}/hello`);
+});
